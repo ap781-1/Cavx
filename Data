@@ -1,0 +1,50 @@
+library(quantmod)
+
+#daily returs data for IBM
+start_date <- "2011-09-01" #we have the realized measure data from 2011-09-01 to 2019-03-29
+end_date <- "2019-03-29"
+getSymbols("IBM", src = "yahoo", from = start_date, to = end_date)
+IBM_adj <-IBM[,6]
+IBM_log<-as.data.frame(log(IBM_adj)) 
+N<-length(IBM_log[,1])
+IBM_ret<-100*(IBM_log[2:N,]-IBM_log[1:N-1,]) 
+IBM_ret_df<-data.frame(100*(IBM_log[2:N,]-IBM_log[1:N-1,]))
+
+IBM_ret_df$Date<-index(IBM_adj)[2:N]
+colnames(IBM_ret_df)<-c("IBM_Returns","Date")
+IBM_ret_df<-IBM_ret_df[,c(2,1)]
+
+#VIX data
+getSymbols("^VIX", src = "yahoo", from = start_date, to = end_date)
+vix_adj<-VIX[,6]
+vix_adj<-na.omit(vix_adj)
+vix_log<-as.data.frame(log(vix_adj))
+#realized measures for IBM
+datarv <- readRDS("IBM_realized.rds")
+
+RV<-datarv[,2]
+RV<-na.omit(RV)
+
+RQ_05<-datarv[,4]
+RQ_05<-na.omit(RQ_05)
+
+RQ_10<-datarv[,5]
+RQ_10<-na.omit(RQ_10)
+
+IBM_ret<-as.numeric(IBM_ret_df$IBM_Returns)
+vix_log<-as.numeric(vix_log$VIX)
+RV<-as.numeric(RV)
+RQ_05<-as.numeric(RQ_05)
+RQ_10<-as.numeric(RQ_10)
+#To make all of the values of same length we will remove the last value of some of the variables
+vix_log<-vix_log[1:length(IBM_ret)]
+RV<-RV[1:length(IBM_ret)]
+RQ_05<-RQ_05[1:length(IBM_ret)]
+RQ_10<-RQ_10[1:length(IBM_ret)]
+
+DATA<-cbind(IBM_ret_df, vix_log, RV, RQ_10, RQ_05)
+DATA<-as.data.frame(DATA)
+
+colnames(DATA)<-c("Date","IBM_Returns", "VIX", "RV", "RQ_10", "RQ_05")
+write.csv(DATA, "IBM_ret.csv") 
+
