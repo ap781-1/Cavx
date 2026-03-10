@@ -1,0 +1,119 @@
+#Descriptive statistics using the data from IBM_ret.csv that we saved from data.R
+IBM_ret <- read.table("IBM_ret.csv", header = TRUE, sep = ",")
+summary(IBM_ret)
+
+library(moments)
+descriptive_stats <- data.frame(
+  Statistic = c("Mean", "Standard Deviation", "Min", "Max", "Skewness", "Kurtosis"),
+  IBM_Returns = c(mean(IBM_ret$IBM_Returns, na.rm = TRUE),
+                  sd(IBM_ret$IBM_Returns, na.rm = TRUE),
+                  min(IBM_ret$IBM_Returns, na.rm = TRUE),
+                  max(IBM_ret$IBM_Returns, na.rm = TRUE),
+                  skewness(IBM_ret$IBM_Returns, na.rm = TRUE),
+                  kurtosis(IBM_ret$IBM_Returns, na.rm = TRUE)),
+  
+  VIX = c(mean(IBM_ret$VIX, na.rm = TRUE),
+          sd(IBM_ret$VIX, na.rm = TRUE),
+          min(IBM_ret$VIX, na.rm = TRUE),
+          max(IBM_ret$VIX, na.rm = TRUE),
+          skewness(IBM_ret$VIX, na.rm = TRUE),
+          kurtosis(IBM_ret$VIX, na.rm = TRUE)),
+  
+  RV = c(mean(IBM_ret$RV, na.rm = TRUE),
+         sd(IBM_ret$RV, na.rm = TRUE),
+         min(IBM_ret$RV, na.rm = TRUE),
+         max(IBM_ret$RV, na.rm = TRUE),
+         skewness(IBM_ret$RV, na.rm = TRUE),
+         kurtosis(IBM_ret$RV, na.rm = TRUE)),
+  
+  RQ_10 = c(mean(IBM_ret$RQ_10, na.rm = TRUE),
+            sd(IBM_ret$RQ_10, na.rm = TRUE),
+            min(IBM_ret$RQ_10, na.rm = TRUE),
+            max(IBM_ret$RQ_10, na.rm = TRUE),
+            skewness(IBM_ret$RQ_10, na.rm = TRUE),
+            kurtosis(IBM_ret$RQ_10, na.rm = TRUE)),
+  
+  RQ_05 = c(mean(IBM_ret$RQ_05, na.rm = TRUE),
+            sd(IBM_ret$RQ_05, na.rm = TRUE),
+            min(IBM_ret$RQ_05, na.rm = TRUE),
+            max(IBM_ret$RQ_05, na.rm = TRUE),
+            skewness(IBM_ret$RQ_05, na.rm = TRUE),
+            kurtosis(IBM_ret$RQ_05, na.rm = TRUE))
+)
+
+# Print the table
+print(descriptive_stats)
+
+data<- IBM_ret
+data$Date <- as.Date(data$Date, format="%Y-%m-%d")
+
+library(tidyr)
+library(ggplot2)
+library(dplyr)
+# Plot all three measures on the same graph
+data$Date <- as.Date(data$Date, format = "%Y-%m-%d")
+
+# Reshape the data to long format for easier plotting with ggplot2
+data_long <- data %>%
+  pivot_longer(cols = c("RV", "RQ_10", "RQ_05"), names_to = "Measure", values_to = "Value")
+
+plot_combined <- ggplot(data_long, aes(x = Date, y = Value, color = Measure)) +
+  geom_line(size = 0.6) +                                      
+                      
+  theme(
+    axis.title = element_text(size = 0, face = "bold"),      
+    axis.text = element_text(size = 12),                      
+    plot.title = element_text(hjust = 0.5, size = 16, face = "bold"), 
+    panel.grid.major = element_line(color = "white"),        
+                           # Remove minor gridlines
+    panel.border = element_rect(color = "black", fill = NA),   
+    plot.background = element_rect(fill = "white", color = NA) 
+  ) +
+  scale_x_date(date_labels = "%Y", breaks = "1 years") +      
+  scale_color_manual(values = c("RV" = "orange",             
+                                "RQ_05" = "#0072B2", 
+                                "RQ_10" = "#009E73"))                               
+
+# Print the plot
+print(plot_combined)
+# Save the plot as a PNG file
+ggsave("Combined_Realized_Measures.png", plot = plot_combined, width = 10, height = 2, dpi = 300)
+#plot for logirithmic VIX
+plot_vix <- ggplot(data, aes(x = Date, y = VIX)) +
+  geom_line(color = "Black") +                         
+  
+  
+  theme(
+    text = element_text(size = 12),                                  
+    axis.title = element_text(size = 0, face = "bold"),             
+    axis.text = element_text(size = 10),                             
+    plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+    panel.grid.major = element_line(color = "grey80"),               
+    panel.grid.minor = element_blank(),                              
+    panel.border = element_rect(color = "black", fill = NA, size = 1),
+    plot.background = element_rect(fill = "white"),                 
+    panel.background = element_rect(fill = "grey")                 
+  ) +
+  scale_x_date(date_labels = "%Y", breaks = "1 year")               
+print(plot_vix)
+ggsave("VIX_Daily_Returns.png", plot = plot_vix, width = 10, height = 2, dpi = 300)
+
+#plot for daily returns 
+plot_ret <- ggplot(data, aes(x = Date, y = IBM_Returns)) +
+  geom_line(colour="Black") +                    
+  
+  theme(
+    text = element_text(size = 0),                             
+    axis.title = element_text(size = 0, face = "bold"),         
+    axis.text = element_text(size = 12),                        
+    plot.title = element_text(hjust = 0.5, size = 16, face = "bold"), 
+    panel.grid.minor = element_blank(),                         
+    panel.border = element_rect(color = "black", fill = NA),    
+    plot.background = element_rect(fill = "white", color = NA),  
+    panel.background = element_rect(fill = "grey")              
+  ) +
+  scale_x_date(date_labels = "%Y", breaks = "1 years")        
+print(plot_ret)
+ggsave("IBM_Daily_Returns.png", plot = plot_ret, width = 10, height = 2, dpi = 300)
+
+#next we will use the data for parameter estimation in Main file.
