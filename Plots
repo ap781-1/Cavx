@@ -1,0 +1,80 @@
+
+#plot for in-sample returns and out of sample with cavx forecasts
+
+# Function to create a customized plot for in-sample and out-of-sample CAViaRx forecast and returns.
+CAViaRplot <- function(returns, measure, title = "VIX vs. Returns", ylabel = "Values", xlabel = "Time") {
+  plot(returns, type = "l", col = "black", lwd = 1, 
+       xlab = xlabel, ylab = ylabel, 
+       main = title,
+       ylim = range(c(returns, measure)),  
+       xaxt = 'n',  
+       bg = "grey") 
+  
+  # Add lines for the realized measure (e.g., VIX) with a different color and line width
+  lines(measure, col = "red", lwd = 2, lty = 1)  
+  points(measure, col = "red", pch = 17, cex = 0.6)  
+  axis(1, at = c(1, length(returns)), labels = c(1, length(returns))) 
+  grid()
+}
+#Plots for In-sample and Out-of-sample returns with CAViaRx forecasts
+CAViaRplot(returns = out_of_sample_returns, measure = outsamcavvix, title = "Out-of-Sample CAViaRx-VIX", ylabel = "Returns", xlabel = "Days")
+CAViaRplot(returns = out_of_sample_returns, measure = outsamcavRV, title = "Out-of-Sample CAViaRx-RV", ylabel = "Returns", xlabel = "Days")
+CAViaRplot(returns = out_of_sample_returns, measure = outsamcavRQ_10, title = "Out-of-Sample CAViaRx-RQ_10", ylabel = "Returns", xlabel = "Days")
+CAViaRplot(returns = out_of_sample_returns, measure = outsamcavRQ_05, title = "Out-of-Sample CAViaRx-RQ_05", ylabel = "Returns", xlabel = "Days")
+CAViaRplot(returns = out_of_sample_returns, measure = outsamcav, title = "Out-of-Sample CAViaRx-Base", ylabel = "Values", xlabel = "Time")
+
+CAViaRplot(returns = in_sample_returns, measure = insamcav, title = "InSample CAViaRx-Base", ylabel = "Values", xlabel = "Time")
+CAViaRplot(returns = in_sample_returns, measure = insamcavvix, title = "InSample CAViaRx-VIX", ylabel = "Returns", xlabel = "Days")
+CAViaRplot(returns = in_sample_returns, measure = insamcavRV, title = "InSample CAViaRx-RV", ylabel = "Returns", xlabel = "Days")
+CAViaRplot(returns = in_sample_returns, measure = insamcavRQ_10, title = "InSample CAViaRx-RQ_10", ylabel = "Returns", xlabel = "Days")
+CAViaRplot(returns = in_sample_returns, measure = insamcavRQ_05, title = "InSample CAViaRx-RQ_05", ylabel = "Returns", xlabel = "Days")
+
+
+# Function to plot out-of-sample returns, VaR, and Variance
+GARCHplot <- function(out_of_sample_returns, var_garch, out_sample_variances, 
+                                         title = "VaR & Conditional Variances ", 
+                                         xlabel = "Time", ylabel = "Values") {
+  
+  # Plot the out-of-sample returns as a black line
+  plot(out_of_sample_returns, type = "l", col = "black", lwd = 1, 
+       xlab = xlabel, ylab = ylabel, 
+       main = title,
+       ylim = range(c(out_of_sample_returns, var_garch, out_sample_variances)),  
+       xaxt = 'n',  
+       bg = "grey") 
+  
+  # Add red line for GARCH Variance (VaR)
+  lines(var_garch, col = "red", lwd = 2, lty = 1)  
+  
+  # Add blue line for Out-Sample Variances
+  lines(out_sample_variances, col = "blue", lwd = 2, lty = 1)  
+  
+  # Add red points for GARCH Variance (VaR)
+  points(var_garch, col = "red", pch = 17, cex = 0.6)  # Red triangles for GARCH Variance
+  
+  # Add blue points for Out-Sample Variances
+  points(out_sample_variances, col = "blue", pch = 18, cex = 0.6)  # Blue solid points for Out-Sample Variances
+  axis(1, at = c(1, length(out_of_sample_returns)), labels = c(1, length(out_of_sample_returns)))  
+  # Add grid lines for better readability
+  grid()
+}
+#plot for out-of sample returns, VaR, and Variance for GARCHx models
+GARCHplot(out_of_sample_returns, var_garxrq10, outsamvariancesrq10, 
+                             title = "VaR & Conditional Variances GARCHx-RQ", 
+                             xlabel = "Time", ylabel = "Values")
+
+GARCHplot(out_of_sample_returns, var_garx, outsamvariancesx, 
+                             title = "VaR & Conditional Variances GARCHx-VIX", 
+                             xlabel = "Time", ylabel = "Values")
+GARCHplot(out_of_sample_returns, var_garch, outsamvariances, 
+                             title = "VaR & Conditional Variances GARCH", 
+                             xlabel = "Time", ylabel = "Values")
+
+GARCHplot(out_of_sample_returns, var_garxrq05, outsamvariancesrq05, 
+                             title = "VaR & Conditional Variances GARCHx-RQ_05", 
+                             xlabel = "Time", ylabel = "Values")
+GARCHplot(out_of_sample_returns, var_garxRV, outsamvariancesRV, 
+                             title = "VaR & Conditional Variances GARCHx-RV", 
+                             xlabel = "Time", ylabel = "Values")
+#Next we will check the forecast performance for all the models in the file Forecast Evaluation.R
+
